@@ -67,7 +67,7 @@ export default function Footer() {
           "
         >
           <Image
-            src="/logo.png"
+            src="/logo/logo.png"
             alt="Dessert Brand"
             fill
             sizes="(max-width: 1024px) 140px, 188px"
