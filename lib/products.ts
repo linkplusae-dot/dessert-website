@@ -1,4 +1,5 @@
 import { connectDB } from "@/lib/mongodb";
+import "@/models/Category";
 import ProductModel from "@/models/Product";
 
 import type {
