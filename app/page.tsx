@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import Header from "@/components/layout/Header";
 import Hero from "@/components/home/Hero";
 import Categories from "@/components/home/Categories";
@@ -7,55 +11,22 @@ import Moments from "@/components/home/Moments";
 import OrderCTA from "@/components/home/OrderCTA";
 import Footer from "@/components/layout/Footer";
 import Products from "@/components/home/Products";
+import type { Category } from "@/types/category";
+import type { Product } from "@/types/product";
 
-import {
-  getFeaturedProducts,
-  getProducts,
-} from "@/lib/products";
+export default function HomePage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
-import {
-  getCategories,
-} from "@/lib/categories";
+  useEffect(() => {
+    Promise.all([fetch("/api/categories"), fetch("/api/products")])
+      .then(async ([categoryResponse, productResponse]) => {
+        const [categoryData, productData] = await Promise.all([categoryResponse.json(), productResponse.json()]);
+        if (categoryResponse.ok) setCategories(categoryData.categories);
+        if (productResponse.ok) setProducts(productData.products);
+      })
+      .catch(() => {});
+  }, []);
 
-
-export default async function HomePage() {
-  const [
-    categories,
-    products,
-    featuredProducts,
-  ] = await Promise.all([
-    getCategories(),
-    getProducts(),
-    getFeaturedProducts(),
-  ]);
-
-  return (
-    <>
-      <Header />
-
-      <main className="w-full pb-[80px] lg:pb-0">
-        <Hero />
-
-        <Categories
-          categories={categories}
-        />
-
-        <BestSellers
-          products={featuredProducts}
-        />
-
-        <Products
-          products={products}
-        />
-
-        <Moments />
-
-        <OrderCTA />
-
-        <Footer />
-      </main>
-
-      <MobileBottomNav />
-    </>
-  );
+  return <><Header /><main className="w-full pb-[80px] lg:pb-0"><Hero /><Categories categories={categories} /><BestSellers products={products.filter((product) => product.featured)} /><Products products={products} /><Moments /><OrderCTA /><Footer /></main><MobileBottomNav /></>;
 }
