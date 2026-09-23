@@ -6,8 +6,11 @@ export default function SignupPage() {
   return (
 <>
 <Header />
-      <SignupForm />
+      <Suspense>
+        <SignupForm />
+      </Suspense>
 <MobileBottomNav />
 </>
   ) 
 }
+import { Suspense } from "react";
