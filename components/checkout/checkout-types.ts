@@ -28,4 +28,4 @@ export type SavedAddress = {
   isDefault: boolean;
 };
 
-export type NewAddress = Omit<SavedAddress, "id" | "isDefault">;
+export type NewAddress = Omit<SavedAddress, "id" | "isDefault" | "addressLine2" | "notes"> & { addressLine2: string; notes: string };

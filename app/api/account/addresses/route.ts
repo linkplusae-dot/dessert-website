@@ -235,9 +235,6 @@ export async function POST(
           area:
             address.area,
 
-          city:
-            address.city,
-
           emirate:
             address.emirate,
 
