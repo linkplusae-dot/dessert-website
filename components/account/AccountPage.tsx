@@ -1,19 +1,27 @@
 "use client";
 
-import { motion } from "framer-motion";
+import {
+  motion,
+} from "framer-motion";
 
 import AccountHeader from "./AccountHeader";
 import AccountNavigation from "./AccountNavigation";
 import ProfileInformation from "./ProfileInformation";
 import SavedAddressPreview from "./SavedAddressPreview";
 
-const customer = {
-  fullName: "Ahmed Daniyal",
-  email: "ahmed@example.com",
-  phone: "+971 50 000 0000",
+type Customer = {
+  fullName: string;
+  email: string;
+  phone: string;
 };
 
-export default function AccountPage() {
+type Props = {
+  customer: Customer;
+};
+
+export default function AccountPage({
+  customer,
+}: Props) {
   return (
     <section
       className="
@@ -46,8 +54,12 @@ export default function AccountPage() {
         "
       >
         <AccountHeader
-          name={customer.fullName}
-          email={customer.email}
+          name={
+            customer.fullName
+          }
+          email={
+            customer.email
+          }
         />
 
         <div
@@ -69,9 +81,15 @@ export default function AccountPage() {
             "
           >
             <ProfileInformation
-              fullName={customer.fullName}
-              email={customer.email}
-              phone={customer.phone}
+              fullName={
+                customer.fullName
+              }
+              email={
+                customer.email
+              }
+              phone={
+                customer.phone
+              }
             />
 
             <SavedAddressPreview />

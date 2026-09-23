@@ -1,15 +1,5 @@
-export type AddressForm = {
-  emirate: string;
-  area: string;
-  street: string;
-  building: string;
-  apartment: string;
-  landmark: string;
-  instructions: string;
-};
-
 export type CartItem = {
-  id: number;
+  id: string;
   name: string;
   category: string;
   image: string;
@@ -24,3 +14,18 @@ export type Customer = {
   email: string;
   phone: string;
 };
+
+export type SavedAddress = {
+  id: string;
+  label: string;
+  recipientName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  area: string;
+  emirate: string;
+  notes?: string;
+  isDefault: boolean;
+};
+
+export type NewAddress = Omit<SavedAddress, "id" | "isDefault">;

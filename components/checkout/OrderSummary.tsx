@@ -5,13 +5,15 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-import { cartItems } from "./checkout-data";
+import type { CartItem } from "./checkout-types";
 
 type Props = {
   subtotal: number;
   deliveryFee: number;
   total: number;
   hasEmirate: boolean;
+  items: CartItem[];
+  isSubmitting: boolean;
 };
 
 export default function OrderSummary({
@@ -19,6 +21,8 @@ export default function OrderSummary({
   deliveryFee,
   total,
   hasEmirate,
+  items,
+  isSubmitting,
 }: Props) {
   return (
     <motion.section
@@ -94,7 +98,7 @@ export default function OrderSummary({
           divide-[var(--primary)]/8
         "
       >
-        {cartItems.map((item) => (
+        {items.map((item) => (
           <div
             key={item.id}
             className="flex gap-3 py-4"
@@ -163,7 +167,7 @@ export default function OrderSummary({
                 {item.name}
               </h3>
 
-              {item.size && (
+                {item.size && (
                 <p
                   className="
                     mt-1
@@ -288,6 +292,7 @@ export default function OrderSummary({
 
       <button
         type="submit"
+        disabled={isSubmitting || !hasEmirate || !items.length}
         className="
           mt-6
           flex
@@ -301,10 +306,10 @@ export default function OrderSummary({
           font-semibold
           text-white
           transition
-          hover:opacity-90
+          hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50
         "
       >
-        Continue to Payment
+        {isSubmitting ? "Preparing Order..." : "Continue to Payment"}
       </button>
 
       <div

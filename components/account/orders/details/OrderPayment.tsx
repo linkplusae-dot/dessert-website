@@ -9,6 +9,7 @@ type Props = {
   deliveryFee: number;
   total: number;
   paymentMethod: string;
+  paymentStatus: string;
 };
 
 export default function OrderPayment({
@@ -16,6 +17,7 @@ export default function OrderPayment({
   deliveryFee,
   total,
   paymentMethod,
+  paymentStatus,
 }: Props) {
   return (
     <section className={cardClass}>
@@ -120,7 +122,7 @@ export default function OrderPayment({
             "
           >
             <CheckCircle2 size={12} />
-            Paid
+            {paymentStatus}
           </div>
         </div>
 

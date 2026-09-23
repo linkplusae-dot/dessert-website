@@ -12,15 +12,26 @@ import {
   FormEvent,
   useState,
 } from "react";
+import {
+  useRouter,
+} from "next/navigation";
 
-const customer = {
-  firstName: "Ahmed",
-  lastName: "Daniyal",
-  email: "ahmed@example.com",
-  phone: "+971 50 000 0000",
+type Customer = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
 };
 
-export default function ProfileForm() {
+type Props = {
+  customer: Customer;
+};
+
+export default function ProfileForm({
+  customer,
+}: Props) {
+  const router = useRouter();
+
   const [
     form,
     setForm,
@@ -31,6 +42,16 @@ export default function ProfileForm() {
     setSaved,
   ] = useState(false);
 
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    isSaving,
+    setIsSaving,
+  ] = useState(false);
+
   function updateField(
     field:
       | "firstName"
@@ -39,6 +60,7 @@ export default function ProfileForm() {
     value: string
   ) {
     setSaved(false);
+    setError("");
 
     setForm((current) => ({
       ...current,
@@ -46,13 +68,76 @@ export default function ProfileForm() {
     }));
   }
 
-  function handleSubmit(
+  async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    // Connect to profile update API later.
-    setSaved(true);
+    if (isSaving) {
+      return;
+    }
+
+    const profile = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      phone: form.phone.trim(),
+    };
+
+    if (
+      !profile.firstName ||
+      !profile.lastName ||
+      !profile.phone
+    ) {
+      setSaved(false);
+      setError("Complete all required fields.");
+      return;
+    }
+
+    setIsSaving(true);
+    setError("");
+    setSaved(false);
+
+    try {
+      const response =
+        await fetch(
+          "/api/account/profile",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify(profile),
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => null
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Unable to save changes."
+        );
+      }
+
+      setForm((current) => ({
+        ...current,
+        ...profile,
+      }));
+      setSaved(true);
+      router.refresh();
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to save changes."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -199,8 +284,19 @@ export default function ProfileForm() {
           </span>
         )}
 
+        {error && (
+          <span
+            role="alert"
+            className="text-[8px] font-semibold text-red-600"
+          >
+            {error}
+          </span>
+        )}
+
         <button
           type="submit"
+          disabled={isSaving}
+          aria-busy={isSaving}
           className="
             flex
             h-[42px]
@@ -215,13 +311,17 @@ export default function ProfileForm() {
             text-white
             transition
             hover:opacity-90
+            disabled:cursor-not-allowed
+            disabled:opacity-60
             sm:h-[44px]
             sm:px-6
             sm:text-[9px]
           "
         >
           <Save size={13} />
-          Save Changes
+          {isSaving
+            ? "Saving..."
+            : "Save Changes"}
         </button>
       </div>
     </form>

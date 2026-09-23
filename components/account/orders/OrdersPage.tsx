@@ -4,6 +4,7 @@ import {
   Package,
   ShoppingBag,
 } from "lucide-react";
+import Link from "next/link";
 
 import {
   useMemo,
@@ -13,10 +14,7 @@ import {
 import OrderCard from "./OrderCard";
 import OrdersHeader from "./OrdersHeader";
 
-import {
-  orders,
-  type OrderStatus,
-} from "./orders-data";
+import { type CustomerOrder, type OrderStatus } from "./orders-data";
 
 type Filter =
   | "All"
@@ -24,6 +22,7 @@ type Filter =
 
 const filters: Filter[] = [
   "All",
+  "Awaiting Payment",
   "Confirmed",
   "Preparing",
   "Out for Delivery",
@@ -31,7 +30,7 @@ const filters: Filter[] = [
   "Cancelled",
 ];
 
-export default function OrdersPage() {
+export default function OrdersPage({ orders }: { orders: CustomerOrder[] }) {
   const [
     filter,
     setFilter,
@@ -47,7 +46,7 @@ export default function OrdersPage() {
         (order) =>
           order.status === filter
       );
-    }, [filter]);
+    }, [filter, orders]);
 
   return (
     <section
@@ -208,11 +207,10 @@ function EmptyOrders() {
           text-[var(--foreground)]/40
         "
       >
-        Orders matching this status
-        will appear here.
+            No orders yet. Your purchases will appear here.
       </p>
 
-      <a
+      <Link
         href="/products"
         className="
           mx-auto
@@ -232,7 +230,7 @@ function EmptyOrders() {
       >
         <ShoppingBag size={13} />
         Explore Desserts
-      </a>
+      </Link>
     </div>
   );
 }

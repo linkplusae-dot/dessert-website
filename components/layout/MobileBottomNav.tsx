@@ -19,6 +19,10 @@ import {
   motion,
 } from "framer-motion";
 
+import {
+  useSession,
+} from "next-auth/react";
+
 import ConnectMenu from "./ConnectMenu";
 
 import {
@@ -31,6 +35,10 @@ export default function MobileBottomNav() {
     isLoaded,
   } = useCart();
 
+  const {
+    status,
+  } = useSession();
+
   const [
     connectOpen,
     setConnectOpen,
@@ -40,6 +48,11 @@ export default function MobileBottomNav() {
     useRef<HTMLDivElement>(
       null
     );
+
+  const accountHref =
+    status === "authenticated"
+      ? "/account"
+      : "/login";
 
   useEffect(() => {
     function handleOutsideClick(
@@ -92,9 +105,7 @@ export default function MobileBottomNav() {
       <div className="relative">
         {/* Connect Popup */}
         <ConnectMenu
-          open={
-            connectOpen
-          }
+          open={connectOpen}
         />
 
         {/* Nav */}
@@ -118,9 +129,7 @@ export default function MobileBottomNav() {
           {/* Home */}
           <Link
             href="/"
-            className={
-              itemClass
-            }
+            className={itemClass}
           >
             <motion.span
               whileTap={{
@@ -139,9 +148,7 @@ export default function MobileBottomNav() {
             >
               <Home
                 size={20}
-                strokeWidth={
-                  2
-                }
+                strokeWidth={2}
               />
             </motion.span>
 
@@ -152,10 +159,14 @@ export default function MobileBottomNav() {
 
           {/* Account */}
           <Link
-            href="/account"
-            className={
-              itemClass
+            href={accountHref}
+            aria-label={
+              status ===
+              "authenticated"
+                ? "My account"
+                : "Login"
             }
+            className={itemClass}
           >
             <motion.div
               whileTap={{
@@ -164,9 +175,7 @@ export default function MobileBottomNav() {
             >
               <UserRound
                 size={25}
-                strokeWidth={
-                  1.6
-                }
+                strokeWidth={1.6}
               />
             </motion.div>
 
@@ -184,9 +193,7 @@ export default function MobileBottomNav() {
                 ? `, ${cartCount} items`
                 : ""
             }`}
-            className={
-              itemClass
-            }
+            className={itemClass}
           >
             <motion.div
               whileTap={{
@@ -196,18 +203,13 @@ export default function MobileBottomNav() {
             >
               <ShoppingCart
                 size={25}
-                strokeWidth={
-                  1.6
-                }
+                strokeWidth={1.6}
               />
 
               {isLoaded &&
-                cartCount >
-                  0 && (
+                cartCount > 0 && (
                   <motion.span
-                    key={
-                      cartCount
-                    }
+                    key={cartCount}
                     initial={{
                       scale: 0.7,
                     }}
@@ -231,8 +233,7 @@ export default function MobileBottomNav() {
                       text-white
                     "
                   >
-                    {cartCount >
-                    99
+                    {cartCount > 99
                       ? "99+"
                       : cartCount}
                   </motion.span>
@@ -249,9 +250,7 @@ export default function MobileBottomNav() {
             type="button"
             onClick={() =>
               setConnectOpen(
-                (
-                  previous
-                ) =>
+                (previous) =>
                   !previous
               )
             }
@@ -266,9 +265,7 @@ export default function MobileBottomNav() {
                 ? "Close contact options"
                 : "Open contact options"
             }
-            className={
-              itemClass
-            }
+            className={itemClass}
           >
             <motion.div
               animate={{
@@ -278,8 +275,7 @@ export default function MobileBottomNav() {
                     : 0,
               }}
               transition={{
-                duration:
-                  0.25,
+                duration: 0.25,
               }}
               className={`
                 flex
@@ -299,9 +295,7 @@ export default function MobileBottomNav() {
             >
               <Phone
                 size={24}
-                strokeWidth={
-                  1.8
-                }
+                strokeWidth={1.8}
               />
             </motion.div>
 

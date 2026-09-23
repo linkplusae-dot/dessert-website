@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 
 import {
+  useSession,
+} from "next-auth/react";
+
+import {
   useCart,
 } from "@/context/CartContext";
 
@@ -18,6 +22,20 @@ export default function Header() {
     cartCount,
     isLoaded,
   } = useCart();
+
+  const {
+    status,
+  } = useSession();
+
+  const accountHref =
+    status === "authenticated"
+      ? "/account"
+      : "/login";
+
+  const accountLabel =
+    status === "authenticated"
+      ? "My account"
+      : "Login";
 
   return (
     <header className="relative z-40 w-full bg-[var(--background)]">
@@ -58,8 +76,8 @@ export default function Header() {
         {/* Actions */}
         <div className="flex shrink-0 items-center gap-6">
           <Link
-            href="/account"
-            aria-label="My account"
+            href={accountHref}
+            aria-label={accountLabel}
             className="text-[var(--primary)] transition hover:opacity-70"
           >
             <UserRound
@@ -71,7 +89,8 @@ export default function Header() {
           <Link
             href="/cart"
             aria-label={`Shopping cart${
-              isLoaded && cartCount > 0
+              isLoaded &&
+              cartCount > 0
                 ? `, ${cartCount} items`
                 : ""
             }`}
@@ -85,8 +104,7 @@ export default function Header() {
             {isLoaded &&
               cartCount > 0 && (
                 <span className="absolute -right-2.5 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[10px] font-semibold text-[var(--white)]">
-                  {cartCount >
-                  99
+                  {cartCount > 99
                     ? "99+"
                     : cartCount}
                 </span>

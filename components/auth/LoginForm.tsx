@@ -3,6 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { signIn } from "next-auth/react";
+import {
   Eye,
   EyeOff,
   LockKeyhole,
@@ -13,28 +18,89 @@ import { motion } from "framer-motion";
 import AuthVisual from "./AuthVisual";
 
 export default function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const callbackUrl =
+    searchParams.get("callbackUrl") ||
+    "/account";
+
+  const signupUrl =
+    callbackUrl !== "/account"
+      ? `/signup?callbackUrl=${encodeURIComponent(
+          callbackUrl
+        )}`
+      : "/signup";
+
   const [email, setEmail] =
     useState("");
 
   const [password, setPassword] =
     useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
 
   const [remember, setRemember] =
     useState(false);
 
-  const handleSubmit = (
+  const [error, setError] =
+    useState("");
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] = useState(false);
+
+  const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
-    // Login logic later
+    if (isSubmitting) return;
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const result = await signIn(
+        "credentials",
+        {
+          email: email
+            .trim()
+            .toLowerCase(),
+          password,
+          redirect: false,
+        }
+      );
+
+      if (!result || result.error) {
+        setError(
+          "Incorrect email or password."
+        );
+        return;
+      }
+
+      router.replace(callbackUrl);
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Login error:",
+        error
+      );
+
+      setError(
+        "Unable to log in. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden ">
+    <main className="min-h-screen overflow-x-hidden">
       {/* Desktop */}
       <div
         className="
@@ -99,7 +165,7 @@ export default function LoginForm() {
                 Don&apos;t have an
                 account?{" "}
                 <Link
-                  href="/signup"
+                  href={signupUrl}
                   className="font-semibold text-[var(--primary)]"
                 >
                   Create your account
@@ -120,14 +186,19 @@ export default function LoginForm() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setEmail(
                         event.target.value
-                      )
-                    }
+                      );
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
                     placeholder="Email Address"
                     autoComplete="email"
                     required
+                    disabled={isSubmitting}
                     className={inputClass}
                   />
                 </InputWrapper>
@@ -146,19 +217,25 @@ export default function LoginForm() {
                         : "password"
                     }
                     value={password}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setPassword(
                         event.target.value
-                      )
-                    }
+                      );
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
                     placeholder="Password"
                     autoComplete="current-password"
                     required
+                    disabled={isSubmitting}
                     className={`${inputClass} pr-12`}
                   />
 
                   <PasswordToggle
                     show={showPassword}
+                    disabled={isSubmitting}
                     onClick={() =>
                       setShowPassword(
                         (current) =>
@@ -173,9 +250,10 @@ export default function LoginForm() {
                     <input
                       type="checkbox"
                       checked={remember}
-                      onChange={(
-                        event
-                      ) =>
+                      disabled={
+                        isSubmitting
+                      }
+                      onChange={(event) =>
                         setRemember(
                           event.target
                             .checked
@@ -201,8 +279,15 @@ export default function LoginForm() {
                   </Link>
                 </div>
 
+                {error && (
+                  <ErrorMessage
+                    message={error}
+                  />
+                )}
+
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="
                     mx-auto
                     mt-5
@@ -218,15 +303,21 @@ export default function LoginForm() {
                     text-white
                     transition
                     hover:opacity-90
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
                   "
                 >
-                  LOGIN
+                  {isSubmitting
+                    ? "LOGGING IN..."
+                    : "LOGIN"}
                 </button>
               </form>
 
               <Divider />
 
-              <GoogleButton text="Continue with Google" />
+              <GoogleButton
+                text="Continue with Google"
+              />
             </div>
           </div>
         </motion.div>
@@ -282,7 +373,9 @@ export default function LoginForm() {
               </p>
             </div>
 
-            <GoogleButton text="Continue with Google" />
+            <GoogleButton
+              text="Continue with Google"
+            />
 
             <Divider />
 
@@ -300,14 +393,19 @@ export default function LoginForm() {
                 <input
                   type="email"
                   value={email}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setEmail(
                       event.target.value
-                    )
-                  }
+                    );
+
+                    if (error) {
+                      setError("");
+                    }
+                  }}
                   placeholder="Email Address"
                   autoComplete="email"
                   required
+                  disabled={isSubmitting}
                   className={inputClass}
                 />
               </InputWrapper>
@@ -326,19 +424,25 @@ export default function LoginForm() {
                       : "password"
                   }
                   value={password}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setPassword(
                       event.target.value
-                    )
-                  }
+                    );
+
+                    if (error) {
+                      setError("");
+                    }
+                  }}
                   placeholder="Password"
                   autoComplete="current-password"
                   required
+                  disabled={isSubmitting}
                   className={`${inputClass} pr-12`}
                 />
 
                 <PasswordToggle
                   show={showPassword}
+                  disabled={isSubmitting}
                   onClick={() =>
                     setShowPassword(
                       (current) =>
@@ -353,6 +457,7 @@ export default function LoginForm() {
                   <input
                     type="checkbox"
                     checked={remember}
+                    disabled={isSubmitting}
                     onChange={(event) =>
                       setRemember(
                         event.target
@@ -379,11 +484,20 @@ export default function LoginForm() {
                 </Link>
               </div>
 
+              {error && (
+                <ErrorMessage
+                  message={error}
+                />
+              )}
+
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className={primaryButtonClass}
               >
-                Log In
+                {isSubmitting
+                  ? "Logging in..."
+                  : "Log In"}
               </button>
             </form>
 
@@ -391,7 +505,7 @@ export default function LoginForm() {
               Don&apos;t have an
               account?{" "}
               <Link
-                href="/signup"
+                href={signupUrl}
                 className="font-semibold text-[var(--primary)] underline underline-offset-4"
               >
                 Sign up
@@ -428,20 +542,23 @@ function InputWrapper({
 function PasswordToggle({
   show,
   onClick,
+  disabled,
 }: {
   show: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={
         show
           ? "Hide password"
           : "Show password"
       }
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground)]/35"
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground)]/35 disabled:cursor-not-allowed"
     >
       {show ? (
         <EyeOff size={18} />
@@ -484,6 +601,28 @@ function Checkbox({
   );
 }
 
+function ErrorMessage({
+  message,
+}: {
+  message: string;
+}) {
+  return (
+    <motion.div
+      initial={{
+        opacity: 0,
+        y: -4,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      className="rounded-[12px] bg-red-50 px-3 py-2.5 text-center text-[10px] font-medium text-red-600"
+    >
+      {message}
+    </motion.div>
+  );
+}
+
 function Divider() {
   return (
     <div className="my-5 flex items-center gap-4">
@@ -506,10 +645,13 @@ function GoogleButton({
   return (
     <button
       type="button"
+      disabled
+      title="Google login will be available soon"
       className="
         flex
         h-[50px]
         w-full
+        cursor-not-allowed
         items-center
         justify-center
         gap-3
@@ -520,8 +662,7 @@ function GoogleButton({
         text-[10px]
         font-semibold
         text-[var(--foreground)]
-        transition
-        hover:bg-[var(--surface)]
+        opacity-60
         sm:h-[52px]
         lg:text-[11px]
       "
@@ -575,6 +716,8 @@ const inputClass = `
   transition
   placeholder:text-[var(--foreground)]/30
   focus:border-[var(--primary)]/45
+  disabled:cursor-not-allowed
+  disabled:opacity-60
   sm:h-[52px]
   sm:text-[11px]
   lg:h-[50px]
@@ -595,4 +738,6 @@ const primaryButtonClass = `
   text-white
   transition
   hover:opacity-90
+  disabled:cursor-not-allowed
+  disabled:opacity-60
 `;

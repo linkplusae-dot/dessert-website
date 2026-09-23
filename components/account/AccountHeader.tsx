@@ -1,9 +1,21 @@
 "use client";
 
 import {
+  useState,
+} from "react";
+
+import {
   LogOut,
+  LoaderCircle,
 } from "lucide-react";
-import { motion } from "framer-motion";
+
+import {
+  motion,
+} from "framer-motion";
+
+import {
+  signOut,
+} from "next-auth/react";
 
 type Props = {
   name: string;
@@ -14,8 +26,40 @@ export default function AccountHeader({
   name,
   email,
 }: Props) {
+  const [
+    isLoggingOut,
+    setIsLoggingOut,
+  ] = useState(false);
+
   const initial =
-    name.trim().charAt(0).toUpperCase() || "U";
+    name
+      .trim()
+      .charAt(0)
+      .toUpperCase() || "U";
+
+  const handleLogout =
+    async () => {
+      if (isLoggingOut) {
+        return;
+      }
+
+      setIsLoggingOut(true);
+
+      try {
+        await signOut({
+          redirectTo: "/",
+        });
+      } catch (error) {
+        console.error(
+          "Logout error:",
+          error
+        );
+
+        setIsLoggingOut(
+          false
+        );
+      }
+    };
 
   return (
     <motion.section
@@ -121,6 +165,12 @@ export default function AccountHeader({
         {/* Logout */}
         <button
           type="button"
+          onClick={
+            handleLogout
+          }
+          disabled={
+            isLoggingOut
+          }
           aria-label="Log out"
           className="
             flex
@@ -134,14 +184,23 @@ export default function AccountHeader({
             text-white
             transition
             hover:bg-white/20
+            disabled:cursor-not-allowed
+            disabled:opacity-60
             sm:h-[40px]
             sm:w-[40px]
           "
         >
-          <LogOut
-            size={15}
-            className="sm:h-4 sm:w-4"
-          />
+          {isLoggingOut ? (
+            <LoaderCircle
+              size={15}
+              className="animate-spin sm:h-4 sm:w-4"
+            />
+          ) : (
+            <LogOut
+              size={15}
+              className="sm:h-4 sm:w-4"
+            />
+          )}
         </button>
       </div>
     </motion.section>

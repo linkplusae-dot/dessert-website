@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
-  Package,
 } from "lucide-react";
 
 import type {
@@ -68,7 +67,7 @@ export default function OrderCard({
               sm:text-[11px]
             "
           >
-            #{order.id}
+            #{order.orderNumber}
           </p>
 
           <div
@@ -82,7 +81,7 @@ export default function OrderCard({
             "
           >
             <CalendarDays size={11} />
-            {order.date}
+            {new Intl.DateTimeFormat("en", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(order.createdAt))}
           </div>
         </div>
 

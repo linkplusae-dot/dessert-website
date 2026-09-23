@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 
 export type OrderProduct = {
-  id: number;
+  id: string;
   name: string;
   image: string;
   quantity: number;

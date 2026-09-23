@@ -7,6 +7,8 @@ import {
   useMemo,
   useState,
   type ReactNode,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
 
 import type {
@@ -22,6 +24,10 @@ type CartContextType = {
   cartCount: number;
 
   cartTotal: number;
+
+  selectedIds: string[];
+
+  setSelectedIds: Dispatch<SetStateAction<string[]>>;
 
   addItem: (
     item: AddToCartItem
@@ -85,6 +91,9 @@ export function CartProvider({
 
   const [isLoaded, setIsLoaded] =
     useState(false);
+
+  const [selectedIds, setSelectedIds] =
+    useState<string[]>([]);
 
   /* Load cart */
 
@@ -337,6 +346,10 @@ export function CartProvider({
 
         cartTotal,
 
+        selectedIds,
+
+        setSelectedIds,
+
         addItem,
 
         removeItem,
@@ -352,6 +365,7 @@ export function CartProvider({
         isLoaded,
         cartCount,
         cartTotal,
+        selectedIds,
       ]
     );
 

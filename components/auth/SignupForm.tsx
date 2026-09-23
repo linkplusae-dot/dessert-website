@@ -3,6 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { signIn } from "next-auth/react";
+import {
   Eye,
   EyeOff,
   LockKeyhole,
@@ -24,6 +29,20 @@ type FormState = {
 };
 
 export default function SignupForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const callbackUrl =
+    searchParams.get("callbackUrl") ||
+    "/account";
+
+  const loginUrl =
+    callbackUrl !== "/account"
+      ? `/login?callbackUrl=${encodeURIComponent(
+          callbackUrl
+        )}`
+      : "/login";
+
   const [form, setForm] =
     useState<FormState>({
       firstName: "",
@@ -34,8 +53,10 @@ export default function SignupForm() {
       confirmPassword: "",
     });
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
 
   const [
     showConfirmPassword,
@@ -45,6 +66,14 @@ export default function SignupForm() {
   const [agreed, setAgreed] =
     useState(false);
 
+  const [error, setError] =
+    useState("");
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] = useState(false);
+
   const updateField = (
     field: keyof FormState,
     value: string
@@ -53,23 +82,123 @@ export default function SignupForm() {
       ...current,
       [field]: value,
     }));
+
+    if (error) {
+      setError("");
+    }
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
-    if (!agreed) return;
+    if (isSubmitting) return;
+
+    setError("");
+
+    if (!agreed) {
+      setError(
+        "Please accept the Terms & Conditions and Privacy Policy."
+      );
+      return;
+    }
 
     if (
       form.password !==
       form.confirmPassword
     ) {
+      setError(
+        "Passwords do not match."
+      );
       return;
     }
 
-    // Signup logic later
+    if (form.password.length < 8) {
+      setError(
+        "Password must be at least 8 characters."
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response =
+        await fetch(
+          "/api/auth/signup",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              firstName:
+                form.firstName.trim(),
+              lastName:
+                form.lastName.trim(),
+              email: form.email
+                .trim()
+                .toLowerCase(),
+              phone:
+                form.phone.trim(),
+              password:
+                form.password,
+              confirmPassword:
+                form.confirmPassword,
+            }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        setError(
+          data.message ||
+            "Unable to create account."
+        );
+        return;
+      }
+
+      const result = await signIn(
+        "credentials",
+        {
+          email: form.email
+            .trim()
+            .toLowerCase(),
+          password: form.password,
+          redirect: false,
+        }
+      );
+
+      if (!result || result.error) {
+        router.replace(
+          `/login?callbackUrl=${encodeURIComponent(
+            callbackUrl
+          )}`
+        );
+
+        return;
+      }
+
+      router.replace(callbackUrl);
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Signup error:",
+        error
+      );
+
+      setError(
+        "Unable to create account. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,7 +267,7 @@ export default function SignupForm() {
                 Already have an
                 account?{" "}
                 <Link
-                  href="/login"
+                  href={loginUrl}
                   className="font-semibold text-[var(--primary)]"
                 >
                   Log in here
@@ -165,17 +294,16 @@ export default function SignupForm() {
                       value={
                         form.firstName
                       }
-                      onChange={(
-                        event
-                      ) =>
+                      onChange={(event) =>
                         updateField(
                           "firstName",
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
                       placeholder="First Name"
+                      autoComplete="given-name"
                       required
+                      disabled={isSubmitting}
                       className={inputClass}
                     />
                   </Field>
@@ -186,17 +314,16 @@ export default function SignupForm() {
                       value={
                         form.lastName
                       }
-                      onChange={(
-                        event
-                      ) =>
+                      onChange={(event) =>
                         updateField(
                           "lastName",
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
                       placeholder="Last Name"
+                      autoComplete="family-name"
                       required
+                      disabled={isSubmitting}
                       className={`${inputClass} pl-4`}
                     />
                   </Field>
@@ -218,7 +345,9 @@ export default function SignupForm() {
                       )
                     }
                     placeholder="Email Address"
+                    autoComplete="email"
                     required
+                    disabled={isSubmitting}
                     className={inputClass}
                   />
                 </Field>
@@ -239,7 +368,9 @@ export default function SignupForm() {
                       )
                     }
                     placeholder="+971 Phone Number"
+                    autoComplete="tel"
                     required
+                    disabled={isSubmitting}
                     className={inputClass}
                   />
                 </Field>
@@ -264,16 +395,20 @@ export default function SignupForm() {
                       )
                     }
                     placeholder="Password"
+                    autoComplete="new-password"
                     minLength={8}
                     required
+                    disabled={isSubmitting}
                     className={`${inputClass} pr-12`}
                   />
 
                   <PasswordToggle
                     show={showPassword}
+                    disabled={isSubmitting}
                     onClick={() =>
                       setShowPassword(
-                        !showPassword
+                        (current) =>
+                          !current
                       )
                     }
                   />
@@ -301,8 +436,10 @@ export default function SignupForm() {
                       )
                     }
                     placeholder="Confirm Password"
+                    autoComplete="new-password"
                     minLength={8}
                     required
+                    disabled={isSubmitting}
                     className={`${inputClass} pr-12`}
                   />
 
@@ -310,9 +447,11 @@ export default function SignupForm() {
                     show={
                       showConfirmPassword
                     }
+                    disabled={isSubmitting}
                     onClick={() =>
                       setShowConfirmPassword(
-                        !showConfirmPassword
+                        (current) =>
+                          !current
                       )
                     }
                   />
@@ -320,12 +459,28 @@ export default function SignupForm() {
 
                 <Terms
                   agreed={agreed}
-                  setAgreed={setAgreed}
+                  disabled={isSubmitting}
+                  setAgreed={(value) => {
+                    setAgreed(value);
+
+                    if (error) {
+                      setError("");
+                    }
+                  }}
                 />
+
+                {error && (
+                  <ErrorMessage
+                    message={error}
+                  />
+                )}
 
                 <button
                   type="submit"
-                  disabled={!agreed}
+                  disabled={
+                    !agreed ||
+                    isSubmitting
+                  }
                   className="
                     mx-auto
                     mt-3
@@ -345,7 +500,9 @@ export default function SignupForm() {
                     disabled:opacity-40
                   "
                 >
-                  CREATE ACCOUNT
+                  {isSubmitting
+                    ? "CREATING..."
+                    : "CREATE ACCOUNT"}
                 </button>
               </form>
             </div>
@@ -426,7 +583,9 @@ export default function SignupForm() {
                       )
                     }
                     placeholder="First Name"
+                    autoComplete="given-name"
                     required
+                    disabled={isSubmitting}
                     className={inputClass}
                   />
                 </Field>
@@ -442,7 +601,9 @@ export default function SignupForm() {
                       )
                     }
                     placeholder="Last Name"
+                    autoComplete="family-name"
                     required
+                    disabled={isSubmitting}
                     className={`${inputClass} pl-4`}
                   />
                 </Field>
@@ -464,7 +625,9 @@ export default function SignupForm() {
                     )
                   }
                   placeholder="Email Address"
+                  autoComplete="email"
                   required
+                  disabled={isSubmitting}
                   className={inputClass}
                 />
               </Field>
@@ -485,7 +648,9 @@ export default function SignupForm() {
                     )
                   }
                   placeholder="+971 Phone Number"
+                  autoComplete="tel"
                   required
+                  disabled={isSubmitting}
                   className={inputClass}
                 />
               </Field>
@@ -510,16 +675,20 @@ export default function SignupForm() {
                     )
                   }
                   placeholder="Password"
+                  autoComplete="new-password"
                   minLength={8}
                   required
+                  disabled={isSubmitting}
                   className={`${inputClass} pr-12`}
                 />
 
                 <PasswordToggle
                   show={showPassword}
+                  disabled={isSubmitting}
                   onClick={() =>
                     setShowPassword(
-                      !showPassword
+                      (current) =>
+                        !current
                     )
                   }
                 />
@@ -547,8 +716,10 @@ export default function SignupForm() {
                     )
                   }
                   placeholder="Confirm Password"
+                  autoComplete="new-password"
                   minLength={8}
                   required
+                  disabled={isSubmitting}
                   className={`${inputClass} pr-12`}
                 />
 
@@ -556,9 +727,11 @@ export default function SignupForm() {
                   show={
                     showConfirmPassword
                   }
+                  disabled={isSubmitting}
                   onClick={() =>
                     setShowConfirmPassword(
-                      !showConfirmPassword
+                      (current) =>
+                        !current
                     )
                   }
                 />
@@ -566,12 +739,28 @@ export default function SignupForm() {
 
               <Terms
                 agreed={agreed}
-                setAgreed={setAgreed}
+                disabled={isSubmitting}
+                setAgreed={(value) => {
+                  setAgreed(value);
+
+                  if (error) {
+                    setError("");
+                  }
+                }}
               />
+
+              {error && (
+                <ErrorMessage
+                  message={error}
+                />
+              )}
 
               <button
                 type="submit"
-                disabled={!agreed}
+                disabled={
+                  !agreed ||
+                  isSubmitting
+                }
                 className="
                   mt-2
                   flex
@@ -590,14 +779,16 @@ export default function SignupForm() {
                   disabled:opacity-40
                 "
               >
-                Create Account
+                {isSubmitting
+                  ? "Creating Account..."
+                  : "Create Account"}
               </button>
             </form>
 
             <p className="mt-7 text-center text-[10px] text-[var(--foreground)]/50">
               Have an account?{" "}
               <Link
-                href="/login"
+                href={loginUrl}
                 className="font-semibold text-[var(--primary)] underline underline-offset-4"
               >
                 Log in here
@@ -634,20 +825,23 @@ function Field({
 function PasswordToggle({
   show,
   onClick,
+  disabled,
 }: {
   show: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={
         show
           ? "Hide password"
           : "Show password"
       }
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground)]/35"
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground)]/35 disabled:cursor-not-allowed"
     >
       {show ? (
         <EyeOff size={17} />
@@ -661,17 +855,33 @@ function PasswordToggle({
 function Terms({
   agreed,
   setAgreed,
+  disabled,
 }: {
   agreed: boolean;
   setAgreed: (
     value: boolean
   ) => void;
+  disabled?: boolean;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-2.5 px-1 pt-1">
+    <label
+      className={`
+        flex
+        items-start
+        gap-2.5
+        px-1
+        pt-1
+        ${
+          disabled
+            ? "cursor-not-allowed opacity-60"
+            : "cursor-pointer"
+        }
+      `}
+    >
       <input
         type="checkbox"
         checked={agreed}
+        disabled={disabled}
         onChange={(event) =>
           setAgreed(
             event.target.checked
@@ -726,6 +936,28 @@ function Terms({
   );
 }
 
+function ErrorMessage({
+  message,
+}: {
+  message: string;
+}) {
+  return (
+    <motion.div
+      initial={{
+        opacity: 0,
+        y: -4,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      className="rounded-[12px] bg-red-50 px-3 py-2.5 text-center text-[10px] font-medium text-red-600"
+    >
+      {message}
+    </motion.div>
+  );
+}
+
 function Divider() {
   return (
     <div className="my-4 flex items-center gap-4">
@@ -744,11 +976,14 @@ function GoogleButton() {
   return (
     <button
       type="button"
+      disabled
+      title="Google signup will be available soon"
       className="
         mt-5
         flex
         h-[48px]
         w-full
+        cursor-not-allowed
         items-center
         justify-center
         gap-3
@@ -759,8 +994,7 @@ function GoogleButton() {
         text-[10px]
         font-semibold
         text-[var(--foreground)]
-        transition
-        hover:bg-[var(--surface)]
+        opacity-60
       "
     >
       <GoogleIcon />
@@ -813,4 +1047,6 @@ const inputClass = `
   transition
   placeholder:text-[var(--foreground)]/30
   focus:border-[var(--primary)]/45
+  disabled:cursor-not-allowed
+  disabled:opacity-60
 `;

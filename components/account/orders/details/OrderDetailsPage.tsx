@@ -7,73 +7,10 @@ import OrderDelivery from "./OrderDelivery";
 import OrderPayment from "./OrderPayment";
 
 type Props = {
-  orderId: string;
+  order: { id: string; date: string; status: string; currentStep: number; customer: { name: string; phone: string }; address: { emirate: string; area: string; street: string; building: string; apartment: string; instructions: string }; products: { id: string; name: string; image: string; quantity: number; price: number; size: string | null; message: string | null }[]; subtotal: number; deliveryFee: number; total: number; paymentMethod: string; paymentStatus: string };
 };
 
-const order = {
-  id: "DS24092201",
-  date: "22 Sep 2026",
-  status: "Preparing",
-
-  currentStep: 1,
-
-  customer: {
-    name: "Ahmed Daniyal",
-    email: "ahmed@example.com",
-    phone: "+971 50 000 0000",
-  },
-
-  address: {
-    emirate: "Dubai",
-    area: "Dubai Marina",
-    street: "Al Marsa Street",
-    building: "Marina Residence",
-    apartment: "Apartment 804",
-    landmark: "Near Marina Mall",
-    instructions:
-      "Please call when you arrive.",
-  },
-
-  products: [
-    {
-      id: 1,
-      name: "Chocolate Dream Cake",
-      image:
-        "/images/products/chocolate-cake.webp",
-      quantity: 1,
-      price: 120,
-      size: "Medium",
-      message: "Happy Birthday!",
-    },
-    {
-      id: 3,
-      name: "Chocolate Brownies",
-      image:
-        "/images/products/brownies.webp",
-      quantity: 2,
-      price: 55,
-      size: null,
-      message: null,
-    },
-  ],
-
-  subtotal: 230,
-  deliveryFee: 20,
-  total: 250,
-
-  paymentMethod:
-    "Credit / Debit Card",
-};
-
-export default function OrderDetailsPage({
-  orderId,
-}: Props) {
-  // Temporary until database is connected.
-  // orderId will be used to fetch the order later.
-  const currentOrder = {
-    ...order,
-    id: orderId,
-  };
+export default function OrderDetailsPage({ order: currentOrder }: Props) {
 
   return (
     <section
@@ -100,7 +37,7 @@ export default function OrderDetailsPage({
           orderNumber={
             currentOrder.id
           }
-          date={currentOrder.date}
+          date={new Intl.DateTimeFormat("en", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(currentOrder.date))}
           status={
             currentOrder.status
           }
@@ -131,7 +68,7 @@ export default function OrderDetailsPage({
 
               <OrderDelivery
                 customer={
-                  currentOrder.customer
+                  { ...currentOrder.customer, email: "" }
                 }
                 address={
                   currentOrder.address
@@ -158,6 +95,7 @@ export default function OrderDetailsPage({
                 paymentMethod={
                   currentOrder.paymentMethod
                 }
+                paymentStatus={currentOrder.paymentStatus}
               />
             </div>
           </div>

@@ -1,7 +1,19 @@
-import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 
-export default function AccountLayout({
-	children,
-}: Readonly<{ children: ReactNode }>) {
-	return children;
+import { auth } from "@/lib/auth";
+
+export default async function AccountLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect(
+      "/login?callbackUrl=%2Faccount"
+    );
+  }
+
+  return <>{children}</>;
 }

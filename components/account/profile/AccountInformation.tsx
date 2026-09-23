@@ -4,7 +4,22 @@ import {
   Mail,
 } from "lucide-react";
 
-export default function AccountInformation() {
+type Props = {
+  createdAt: string;
+};
+
+export default function AccountInformation({
+  createdAt,
+}: Props) {
+  const memberSince =
+    new Intl.DateTimeFormat(
+      "en",
+      {
+        month: "long",
+        year: "numeric",
+      }
+    ).format(new Date(createdAt));
+
   return (
     <section className={cardClass}>
       <div
@@ -67,9 +82,8 @@ export default function AccountInformation() {
       >
         <InfoRow
           icon={<Mail size={14} />}
-          label="Email Status"
-          value="Verified"
-          verified
+          label="Email"
+          value="Registered"
         />
 
         <div
@@ -83,7 +97,7 @@ export default function AccountInformation() {
         <InfoRow
           icon={<CalendarDays size={14} />}
           label="Member Since"
-          value="September 2026"
+          value={memberSince}
         />
       </div>
     </section>
@@ -94,12 +108,10 @@ function InfoRow({
   icon,
   label,
   value,
-  verified = false,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
-  verified?: boolean;
 }) {
   return (
     <div
@@ -134,17 +146,9 @@ function InfoRow({
           text-[8px]
           font-semibold
 
-          ${
-            verified
-              ? "text-emerald-600"
-              : "text-[var(--foreground)]"
-          }
+          text-[var(--foreground)]
         `}
       >
-        {verified && (
-          <BadgeCheck size={12} />
-        )}
-
         {value}
       </span>
     </div>

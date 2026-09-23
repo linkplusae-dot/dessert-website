@@ -12,7 +12,21 @@ import PasswordSecurity from "./PasswordSecurity";
 import ProfileForm from "./ProfileForm";
 import ProfileHeader from "./ProfileHeader";
 
-export default function ProfilePage() {
+type Customer = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+};
+
+type Props = {
+  customer: Customer;
+};
+
+export default function ProfilePage({
+  customer,
+}: Props) {
   const [
     changePasswordOpen,
     setChangePasswordOpen,
@@ -55,7 +69,9 @@ export default function ProfilePage() {
               sm:space-y-4
             "
           >
-            <ProfileForm />
+            <ProfileForm
+              customer={customer}
+            />
 
             <PasswordSecurity
               onChangePassword={() =>
@@ -63,7 +79,9 @@ export default function ProfilePage() {
               }
             />
 
-            <AccountInformation />
+            <AccountInformation
+              createdAt={customer.createdAt}
+            />
 
             <DeleteAccount
               onDelete={() =>

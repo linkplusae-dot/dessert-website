@@ -96,10 +96,7 @@ export default function OrderDelivery({
           value={customer.phone}
         />
 
-        <Info
-          icon={<Mail size={13} />}
-          value={customer.email}
-        />
+        {customer.email && <Info icon={<Mail size={13} />} value={customer.email} />}
 
         <div
           className="
