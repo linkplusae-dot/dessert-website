@@ -1,350 +1,158 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useState,
+} from "react";
+
 import Image from "next/image";
-import Link from "next/link";
+
 import {
   Check,
   Minus,
   Plus,
   ShoppingCart,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
-const products = [
-  {
-    id: 1,
-    name: "Chocolate Dream Cake",
-    category: "Cakes",
-    price: 120,
+import {
+  motion,
+} from "framer-motion";
 
-    images: [
-      "/images/products/chocolate-cake.webp",
-      "/images/products/chocolate-cake.webp",
-      "/images/products/chocolate-cake.webp",
-    ],
+import {
+  useCart,
+} from "@/context/CartContext";
 
-    description:
-      "Rich chocolate cake layered with smooth chocolate cream and finished with an indulgent chocolate topping. Freshly prepared for birthdays, celebrations and every sweet moment.",
-
-    sizes: [
-      {
-        label: "Small",
-        value: "small",
-      },
-      {
-        label: "Medium",
-        value: "medium",
-      },
-      {
-        label: "Large",
-        value: "large",
-      },
-    ],
-
-    messageAvailable: true,
-
-    details: [
-      "Freshly made to order",
-      "Prepared with carefully selected ingredients",
-      "Perfect for celebrations and gifting",
-    ],
-
-    storage:
-      "Keep refrigerated. For the best taste and texture, allow the cake to sit at room temperature for a short time before serving.",
-
-    allergens:
-      "Contains dairy, eggs and wheat. Please contact us before ordering if you have specific allergy concerns.",
-  },
-
-  {
-    id: 2,
-    name: "Strawberry Cupcakes",
-    category: "Cupcakes",
-    price: 65,
-
-    images: [
-      "/images/products/strawberry-cupcakes.webp",
-      "/images/products/strawberry-cupcakes.webp",
-      "/images/products/strawberry-cupcakes.webp",
-    ],
-
-    description:
-      "Soft cupcakes topped with creamy strawberry frosting and a delicate strawberry finish.",
-
-    sizes: [],
-
-    messageAvailable: false,
-
-    details: [
-      "Freshly made",
-      "Soft and creamy",
-      "Perfect for celebrations",
-    ],
-
-    storage:
-      "Keep refrigerated and store in a covered container.",
-
-    allergens:
-      "Contains dairy, eggs and wheat.",
-  },
-
-  {
-    id: 3,
-    name: "Chocolate Brownies",
-    category: "Brownies",
-    price: 55,
-
-    images: [
-      "/images/products/brownies.webp",
-      "/images/products/brownies.webp",
-      "/images/products/brownies.webp",
-    ],
-
-    description:
-      "Rich and fudgy chocolate brownies with a soft centre and deep chocolate flavour.",
-
-    sizes: [],
-
-    messageAvailable: false,
-
-    details: [
-      "Freshly baked",
-      "Rich chocolate flavour",
-      "Perfect for sharing",
-    ],
-
-    storage:
-      "Store in a cool, dry place in an airtight container.",
-
-    allergens:
-      "Contains dairy, eggs and wheat.",
-  },
-
-  {
-    id: 4,
-    name: "Dessert Box",
-    category: "Gift Boxes",
-    price: 95,
-
-    images: [
-      "/images/products/dessert-box.webp",
-      "/images/products/dessert-box.webp",
-      "/images/products/dessert-box.webp",
-    ],
-
-    description:
-      "A carefully prepared dessert selection presented beautifully for gifting, celebrations or simply treating yourself.",
-
-    sizes: [],
-
-    messageAvailable: false,
-
-    details: [
-      "Beautifully presented",
-      "Fresh dessert selection",
-      "Perfect for gifting",
-    ],
-
-    storage:
-      "Storage depends on the desserts included in the box. Keep refrigerated where required.",
-
-    allergens:
-      "May contain dairy, eggs, wheat and nuts.",
-  },
-
-  {
-    id: 5,
-    name: "Lotus Cheesecake",
-    category: "Cakes",
-    price: 110,
-
-    images: [
-      "/images/products/lotus-cheesecake.webp",
-      "/images/products/lotus-cheesecake.webp",
-      "/images/products/lotus-cheesecake.webp",
-    ],
-
-    description:
-      "Creamy cheesecake with the unmistakable caramelised flavour of Lotus biscuits and a smooth, indulgent finish.",
-
-    sizes: [
-      {
-        label: "Small",
-        value: "small",
-      },
-      {
-        label: "Medium",
-        value: "medium",
-      },
-      {
-        label: "Large",
-        value: "large",
-      },
-    ],
-
-    messageAvailable: true,
-
-    details: [
-      "Freshly made",
-      "Creamy cheesecake filling",
-      "Finished with Lotus biscuit flavour",
-    ],
-
-    storage:
-      "Keep refrigerated until ready to serve.",
-
-    allergens:
-      "Contains dairy, wheat and may contain eggs.",
-  },
-
-  {
-    id: 6,
-    name: "Chocolate Cookies",
-    category: "Cookies",
-    price: 45,
-
-    images: [
-      "/images/products/chocolate-cookies.webp",
-      "/images/products/chocolate-cookies.webp",
-      "/images/products/chocolate-cookies.webp",
-    ],
-
-    description:
-      "Freshly baked chocolate cookies with a soft centre and rich chocolate flavour.",
-
-    sizes: [],
-
-    messageAvailable: false,
-
-    details: [
-      "Freshly baked",
-      "Soft centre",
-      "Rich chocolate flavour",
-    ],
-
-    storage:
-      "Store in an airtight container in a cool, dry place.",
-
-    allergens:
-      "Contains dairy, eggs and wheat.",
-  },
-
-  {
-    id: 7,
-    name: "Strawberry Dessert Cup",
-    category: "Dessert Cups",
-    price: 38,
-
-    images: [
-      "/images/products/strawberry-dessert-cup.webp",
-      "/images/products/strawberry-dessert-cup.webp",
-      "/images/products/strawberry-dessert-cup.webp",
-    ],
-
-    description:
-      "A light and creamy strawberry dessert cup, prepared fresh for a sweet individual treat.",
-
-    sizes: [],
-
-    messageAvailable: false,
-
-    details: [
-      "Freshly prepared",
-      "Creamy strawberry flavour",
-      "Perfect for an individual treat",
-    ],
-
-    storage:
-      "Keep refrigerated until ready to enjoy.",
-
-    allergens:
-      "Contains dairy, eggs and wheat.",
-  },
-
-  {
-    id: 8,
-    name: "Mini Celebration Cake",
-    category: "Cakes",
-    price: 85,
-
-    images: [
-      "/images/products/mini-celebration-cake.webp",
-      "/images/products/mini-celebration-cake.webp",
-      "/images/products/mini-celebration-cake.webp",
-    ],
-
-    description:
-      "A beautifully finished mini cake made for intimate celebrations and sweet special moments.",
-
-    sizes: [],
-
-    messageAvailable: true,
-
-    details: [
-      "Freshly made to order",
-      "Ideal for small celebrations",
-      "Beautifully finished",
-    ],
-
-    storage:
-      "Keep refrigerated. Let the cake sit at room temperature briefly before serving for the best texture.",
-
-    allergens:
-      "Contains dairy, eggs and wheat.",
-  },
-];
+import type {
+  Product,
+} from "@/types/product";
 
 type ProductDetailsProps = {
-  productId: string;
+  product: Product;
 };
 
 export default function ProductDetails({
-  productId,
+  product,
 }: ProductDetailsProps) {
-  const product = products.find(
-    (item) => item.id === Number(productId)
-  );
+  const { addItem } = useCart();
 
-  const [selectedImage, setSelectedImage] =
-    useState(0);
+  const [
+    selectedImage,
+    setSelectedImage,
+  ] = useState(0);
 
-  const [selectedSize, setSelectedSize] =
-    useState("");
+  const [
+    selectedSize,
+    setSelectedSize,
+  ] = useState("");
 
-  const [quantity, setQuantity] =
-    useState(1);
+  const [
+    quantity,
+    setQuantity,
+  ] = useState(1);
 
-  const [message, setMessage] =
-    useState("");
+  const [
+    message,
+    setMessage,
+  ] = useState("");
 
-  if (!product) {
-    return (
-      <main className="flex min-h-[70vh] items-center justify-center bg-[var(--background)] px-5">
-        <div className="text-center">
-          <h1 className="font-serif text-[28px] font-semibold text-[var(--foreground)]">
-            Dessert not found
-          </h1>
+  const [
+    sizeError,
+    setSizeError,
+  ] = useState(false);
 
-          <Link
-            href="/products"
-            className="mt-5 inline-flex rounded-full bg-[var(--primary)] px-6 py-3 text-[11px] font-semibold text-white"
-          >
-            Back to Desserts
-          </Link>
-        </div>
-      </main>
+  const [
+    addedToCart,
+    setAddedToCart,
+  ] = useState(false);
+
+  const selectedSizeData =
+    product.sizes.find(
+      (size) =>
+        size.label ===
+        selectedSize
     );
-  }
+
+  const displayPrice =
+    selectedSizeData?.price ??
+    product.price;
 
   const decreaseQuantity = () => {
     setQuantity((current) =>
-      Math.max(1, current - 1)
+      Math.max(
+        1,
+        current - 1
+      )
     );
   };
 
   const increaseQuantity = () => {
-    setQuantity((current) => current + 1);
+    setQuantity((current) =>
+      Math.min(
+        product.stock,
+        current + 1
+      )
+    );
+  };
+
+  const handleSizeSelect = (
+    size: string
+  ) => {
+    setSelectedSize(size);
+    setSizeError(false);
+  };
+
+  const handleAddToCart = () => {
+    if (product.stock <= 0) {
+      return;
+    }
+
+    if (
+      product.sizes.length >
+        0 &&
+      !selectedSize
+    ) {
+      setSizeError(true);
+
+      return;
+    }
+
+    setSizeError(false);
+
+    addItem({
+      productId:
+        product._id,
+
+      name:
+        product.name,
+
+      slug:
+        product.slug,
+
+      image:
+        product.images[0] ||
+        "",
+
+      price:
+        displayPrice,
+
+      quantity,
+
+      stock:
+        product.stock,
+
+      selectedSize:
+        selectedSize ||
+        undefined,
+
+      message:
+        message.trim() ||
+        undefined,
+    });
+
+    setAddedToCart(true);
+
+    window.setTimeout(() => {
+      setAddedToCart(false);
+    }, 1800);
   };
 
   return (
@@ -385,22 +193,26 @@ export default function ProductDetails({
                 src={
                   product.images[
                     selectedImage
-                  ]
+                  ] ||
+                  "/images/product-placeholder.webp"
                 }
                 alt={product.name}
                 fill
                 priority
-                loading="eager"
                 sizes="(max-width: 1024px) 100vw, 55vw"
                 className="object-cover"
               />
             </div>
 
             {/* Thumbnails */}
-            {product.images.length > 1 && (
+            {product.images.length >
+              1 && (
               <div className="mt-3 flex gap-2.5 lg:mt-4 lg:gap-3">
                 {product.images.map(
-                  (image, index) => (
+                  (
+                    image,
+                    index
+                  ) => (
                     <button
                       key={`${image}-${index}`}
                       type="button"
@@ -453,7 +265,9 @@ export default function ProductDetails({
               </p>
 
               <p className="mt-3 max-w-[620px] text-[13px] leading-6 text-[var(--foreground)]/65">
-                {product.description}
+                {
+                  product.description
+                }
               </p>
             </div>
           </motion.div>
@@ -475,7 +289,10 @@ export default function ProductDetails({
           >
             {/* Category */}
             <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[var(--accent)] lg:text-[11px]">
-              {product.category}
+              {
+                product.category
+                  .name
+              }
             </p>
 
             {/* Name */}
@@ -485,102 +302,131 @@ export default function ProductDetails({
 
             {/* Price */}
             <p className="mt-3 text-[20px] font-bold text-[var(--primary)] lg:mt-4 lg:text-[24px]">
-              AED {product.price}
+              AED{" "}
+              {displayPrice}
+            </p>
+
+            {/* Stock */}
+            <p
+              className={`mt-1.5 text-[10px] font-medium ${
+                product.stock >
+                0
+                  ? "text-[var(--foreground)]/45"
+                  : "text-red-500"
+              }`}
+            >
+              {product.stock >
+              0
+                ? "Available"
+                : "Sold Out"}
             </p>
 
             {/* Quantity */}
-            <div className="mt-5 lg:mt-6">
-              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/55 lg:text-[10px]">
-                Quantity
-              </p>
+            {product.stock >
+              0 && (
+              <div className="mt-5 lg:mt-6">
+                <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/55 lg:text-[10px]">
+                  Quantity
+                </p>
 
-              <div
-                className="
-                  flex
-                  h-[44px]
-                  w-[132px]
-                  items-center
-                  justify-between
-                  rounded-full
-                  border
-                  border-[var(--primary)]/15
-                  bg-[var(--white)]
-                  px-1
-                  lg:h-[48px]
-                  lg:w-[145px]
-                "
-              >
-                <button
-                  type="button"
-                  onClick={
-                    decreaseQuantity
-                  }
-                  disabled={
-                    quantity === 1
-                  }
-                  aria-label="Decrease quantity"
+                <div
                   className="
                     flex
-                    h-9
-                    w-9
+                    h-[44px]
+                    w-[132px]
                     items-center
-                    justify-center
+                    justify-between
                     rounded-full
-                    text-[var(--foreground)]
-                    transition
-                    hover:bg-[var(--surface)]
-                    disabled:cursor-not-allowed
-                    disabled:opacity-30
-                    lg:h-10
-                    lg:w-10
+                    border
+                    border-[var(--primary)]/15
+                    bg-[var(--white)]
+                    px-1
+                    lg:h-[48px]
+                    lg:w-[145px]
                   "
                 >
-                  <Minus
-                    size={15}
-                    strokeWidth={1.8}
-                  />
-                </button>
+                  <button
+                    type="button"
+                    onClick={
+                      decreaseQuantity
+                    }
+                    disabled={
+                      quantity === 1
+                    }
+                    aria-label="Decrease quantity"
+                    className="
+                      flex
+                      h-9
+                      w-9
+                      items-center
+                      justify-center
+                      rounded-full
+                      text-[var(--foreground)]
+                      transition
+                      hover:bg-[var(--surface)]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-30
+                      lg:h-10
+                      lg:w-10
+                    "
+                  >
+                    <Minus
+                      size={15}
+                      strokeWidth={
+                        1.8
+                      }
+                    />
+                  </button>
 
-                <span className="text-[12px] font-semibold text-[var(--foreground)] lg:text-[13px]">
-                  {quantity}
-                </span>
+                  <span className="text-[12px] font-semibold text-[var(--foreground)] lg:text-[13px]">
+                    {quantity}
+                  </span>
 
-                <button
-                  type="button"
-                  onClick={
-                    increaseQuantity
-                  }
-                  aria-label="Increase quantity"
-                  className="
-                    flex
-                    h-9
-                    w-9
-                    items-center
-                    justify-center
-                    rounded-full
-                    text-[var(--foreground)]
-                    transition
-                    hover:bg-[var(--surface)]
-                    lg:h-10
-                    lg:w-10
-                  "
-                >
-                  <Plus
-                    size={15}
-                    strokeWidth={1.8}
-                  />
-                </button>
+                  <button
+                    type="button"
+                    onClick={
+                      increaseQuantity
+                    }
+                    disabled={
+                      quantity >=
+                      product.stock
+                    }
+                    aria-label="Increase quantity"
+                    className="
+                      flex
+                      h-9
+                      w-9
+                      items-center
+                      justify-center
+                      rounded-full
+                      text-[var(--foreground)]
+                      transition
+                      hover:bg-[var(--surface)]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-30
+                      lg:h-10
+                      lg:w-10
+                    "
+                  >
+                    <Plus
+                      size={15}
+                      strokeWidth={
+                        1.8
+                      }
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Size + Message */}
-            {(product.sizes.length >
-              0 ||
-              product.messageAvailable) && (
+            {/* Options */}
+            {(product.sizes
+              .length > 0 ||
+              product.allowMessage) && (
               <div className="mt-5 lg:mt-6">
                 {/* Size */}
-                {product.sizes.length >
-                  0 && (
+                {product.sizes
+                  .length > 0 && (
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/55 lg:text-[10px]">
                       Select Size
@@ -591,17 +437,17 @@ export default function ProductDetails({
                         (size) => {
                           const selected =
                             selectedSize ===
-                            size.value;
+                            size.label;
 
                           return (
                             <button
                               key={
-                                size.value
+                                size.label
                               }
                               type="button"
                               onClick={() =>
-                                setSelectedSize(
-                                  size.value
+                                handleSizeSelect(
+                                  size.label
                                 )
                               }
                               className={`
@@ -638,19 +484,46 @@ export default function ProductDetails({
                                 />
                               )}
 
-                              {
-                                size.label
-                              }
+                              <span>
+                                {
+                                  size.label
+                                }
+                              </span>
+
+                              <span className="opacity-70">
+                                AED{" "}
+                                {
+                                  size.price
+                                }
+                              </span>
                             </button>
                           );
                         }
                       )}
                     </div>
+
+                    {/* Size Error */}
+                    {sizeError && (
+                      <motion.p
+                        initial={{
+                          opacity: 0,
+                          y: -3,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                        }}
+                        className="mt-2 text-[9px] font-medium text-red-500 lg:text-[10px]"
+                      >
+                        Please select
+                        a size.
+                      </motion.p>
+                    )}
                   </div>
                 )}
 
                 {/* Message */}
-                {product.messageAvailable && (
+                {product.allowMessage && (
                   <div
                     className={
                       product.sizes
@@ -671,13 +544,18 @@ export default function ProductDetails({
 
                     <input
                       type="text"
-                      value={message}
-                      maxLength={40}
+                      value={
+                        message
+                      }
+                      maxLength={
+                        40
+                      }
                       onChange={(
                         event
                       ) =>
                         setMessage(
-                          event.target
+                          event
+                            .target
                             .value
                         )
                       }
@@ -703,7 +581,9 @@ export default function ProductDetails({
                     />
 
                     <p className="mt-1.5 text-right text-[8px] text-[var(--foreground)]/35">
-                      {message.length}
+                      {
+                        message.length
+                      }
                       /40
                     </p>
                   </div>
@@ -714,10 +594,14 @@ export default function ProductDetails({
             {/* Add to Cart */}
             <button
               type="button"
-              onClick={() => {
-                // Add to cart logic later
-              }}
-              className="
+              onClick={
+                handleAddToCart
+              }
+              disabled={
+                product.stock <=
+                0
+              }
+              className={`
                 mt-5
                 flex
                 h-[48px]
@@ -726,7 +610,6 @@ export default function ProductDetails({
                 justify-center
                 gap-2.5
                 rounded-full
-                bg-[var(--primary)]
                 px-6
                 text-[11px]
                 font-semibold
@@ -736,17 +619,38 @@ export default function ProductDetails({
                 duration-300
                 hover:scale-[1.01]
                 hover:opacity-90
+                disabled:cursor-not-allowed
+                disabled:opacity-40
                 lg:mt-6
                 lg:h-[54px]
                 lg:text-[13px]
-              "
+                ${
+                  addedToCart
+                    ? "bg-[var(--accent)]"
+                    : "bg-[var(--primary)]"
+                }
+              `}
             >
-              <ShoppingCart
-                size={17}
-                strokeWidth={1.8}
-              />
+              {addedToCart ? (
+                <Check
+                  size={17}
+                  strokeWidth={2}
+                />
+              ) : (
+                <ShoppingCart
+                  size={17}
+                  strokeWidth={
+                    1.8
+                  }
+                />
+              )}
 
-              Add to Cart
+              {product.stock <=
+              0
+                ? "Sold Out"
+                : addedToCart
+                  ? "Added to Cart"
+                  : "Add to Cart"}
             </button>
 
             {/* Mobile Description */}
@@ -756,62 +660,71 @@ export default function ProductDetails({
               </p>
 
               <p className="mt-2 text-[11px] leading-5 text-[var(--foreground)]/65">
-                {product.description}
+                {
+                  product.description
+                }
               </p>
             </div>
           </motion.div>
         </div>
 
         {/* Additional Information */}
-        <section className="mt-10 border-t border-[var(--primary)]/10 pt-8 lg:mt-16 lg:pt-10">
-          <div className="grid gap-7 md:grid-cols-3 md:gap-8 lg:gap-12">
-            {/* Product Details */}
-            <div>
-              <h2 className="font-serif text-[19px] font-semibold text-[var(--foreground)] lg:text-[22px]">
-                Product Details
-              </h2>
+        {(product.details
+          .length > 0 ||
+          product.storage) && (
+          <section className="mt-10 border-t border-[var(--primary)]/10 pt-8 lg:mt-16 lg:pt-10">
+            <div className="grid gap-7 md:grid-cols-2 md:gap-10 lg:gap-16">
+              {/* Product Details */}
+              {product.details
+                .length > 0 && (
+                <div>
+                  <h2 className="font-serif text-[19px] font-semibold text-[var(--foreground)] lg:text-[22px]">
+                    Product
+                    Details
+                  </h2>
 
-              <div className="mt-4 space-y-2.5">
-                {product.details.map(
-                  (detail) => (
-                    <div
-                      key={detail}
-                      className="flex items-start gap-2.5"
-                    >
-                      <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                  <div className="mt-4 space-y-2.5">
+                    {product.details.map(
+                      (
+                        detail
+                      ) => (
+                        <div
+                          key={
+                            detail
+                          }
+                          className="flex items-start gap-2.5"
+                        >
+                          <span className="mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
 
-                      <p className="text-[10px] leading-5 text-[var(--foreground)]/60 lg:text-[12px]">
-                        {detail}
-                      </p>
-                    </div>
-                  )
-                )}
-              </div>
+                          <p className="text-[10px] leading-5 text-[var(--foreground)]/60 lg:text-[12px]">
+                            {
+                              detail
+                            }
+                          </p>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Storage */}
+              {product.storage && (
+                <div>
+                  <h2 className="font-serif text-[19px] font-semibold text-[var(--foreground)] lg:text-[22px]">
+                    Storage
+                  </h2>
+
+                  <p className="mt-4 text-[10px] leading-5 text-[var(--foreground)]/60 lg:text-[12px] lg:leading-6">
+                    {
+                      product.storage
+                    }
+                  </p>
+                </div>
+              )}
             </div>
-
-            {/* Storage */}
-            <div>
-              <h2 className="font-serif text-[19px] font-semibold text-[var(--foreground)] lg:text-[22px]">
-                Storage
-              </h2>
-
-              <p className="mt-4 text-[10px] leading-5 text-[var(--foreground)]/60 lg:text-[12px] lg:leading-6">
-                {product.storage}
-              </p>
-            </div>
-
-            {/* Allergens */}
-            <div>
-              <h2 className="font-serif text-[19px] font-semibold text-[var(--foreground)] lg:text-[22px]">
-                Allergens
-              </h2>
-
-              <p className="mt-4 text-[10px] leading-5 text-[var(--foreground)]/60 lg:text-[12px] lg:leading-6">
-                {product.allergens}
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </main>
   );

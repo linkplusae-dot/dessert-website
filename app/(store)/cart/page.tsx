@@ -6,10 +6,13 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 export default function Page() {
   return (
     <>
-    <Header />
+      <Header />
+
       <CartPage />
-    <Footer />
-    <MobileBottomNav />
+
+      <Footer />
+
+      <MobileBottomNav />
     </>
-  ) 
+  );
 }

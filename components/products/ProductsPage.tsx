@@ -1,60 +1,29 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+} from "react";
+
 import Image from "next/image";
 import Link from "next/link";
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+
 import {
   ChevronDown,
   Search,
   ShoppingCart,
   X,
 } from "lucide-react";
+
 import { motion } from "framer-motion";
 
-const products = [
-  {
-    id: 1,
-    name: "Chocolate Dream Cake",
-    category: "Cakes",
-    price: 120,
-    image: "/images/products/chocolate-cake.webp",
-  },
-  {
-    id: 2,
-    name: "Strawberry Cupcakes",
-    category: "Cupcakes",
-    price: 65,
-    image: "/images/products/strawberry-cupcakes.webp",
-  },
-  {
-    id: 3,
-    name: "Chocolate Brownies",
-    category: "Brownies",
-    price: 55,
-    image: "/images/products/brownies.webp",
-  },
-  {
-    id: 4,
-    name: "Dessert Box",
-    category: "Gift Boxes",
-    price: 95,
-    image: "/images/products/dessert-box.webp",
-  },
-  {
-    id: 5,
-    name: "Lotus Cheesecake",
-    category: "Cakes",
-    price: 110,
-    image: "/images/products/lotus-cheesecake.webp",
-  },
-  {
-    id: 6,
-    name: "Chocolate Cookies",
-    category: "Cookies",
-    price: 45,
-    image: "/images/products/chocolate-cookies.webp",
-  },
-];
+import type {
+  Product,
+} from "@/types/product";
 
 type SortOption =
   | "featured"
@@ -62,42 +31,148 @@ type SortOption =
   | "price-high"
   | "name";
 
-export default function ProductsPage() {
-  const [sort, setSort] = useState<SortOption>("featured");
-  const [search, setSearch] = useState("");
+type ProductsPageProps = {
+  products: Product[];
+};
 
-  const filteredProducts = useMemo(() => {
-    const query = search.trim().toLowerCase();
+export default function ProductsPage({
+  products,
+}: ProductsPageProps) {
+  const router = useRouter();
+  const searchParams =
+    useSearchParams();
 
-    let result = products.filter((product) => {
-      if (!query) {
-        return true;
+  const [sort, setSort] =
+    useState<SortOption>(
+      "featured"
+    );
+
+  const [search, setSearch] =
+    useState("");
+
+  const categorySlug =
+    searchParams.get("category");
+
+  /* Selected category */
+
+  const selectedCategory =
+    categorySlug
+      ? products.find(
+          (product) =>
+            product.category
+              .slug ===
+            categorySlug
+        )?.category
+      : null;
+
+  /* Filter + sort */
+
+  const filteredProducts =
+    useMemo(() => {
+      const query = search
+        .trim()
+        .toLowerCase();
+
+      let result =
+        products.filter(
+          (product) => {
+            const matchesCategory =
+              !categorySlug ||
+              product.category
+                .slug ===
+                categorySlug;
+
+            const matchesSearch =
+              !query ||
+              product.name
+                .toLowerCase()
+                .includes(
+                  query
+                ) ||
+              product.category
+                .name
+                .toLowerCase()
+                .includes(
+                  query
+                );
+
+            return (
+              matchesCategory &&
+              matchesSearch
+            );
+          }
+        );
+
+      result = [...result];
+
+      if (
+        sort === "featured"
+      ) {
+        result.sort(
+          (a, b) =>
+            Number(
+              b.featured
+            ) -
+            Number(
+              a.featured
+            )
+        );
       }
 
-      return (
-        product.name.toLowerCase().includes(query) ||
-        product.category.toLowerCase().includes(query)
+      if (
+        sort === "price-low"
+      ) {
+        result.sort(
+          (a, b) =>
+            a.price -
+            b.price
+        );
+      }
+
+      if (
+        sort === "price-high"
+      ) {
+        result.sort(
+          (a, b) =>
+            b.price -
+            a.price
+        );
+      }
+
+      if (sort === "name") {
+        result.sort(
+          (a, b) =>
+            a.name.localeCompare(
+              b.name
+            )
+        );
+      }
+
+      return result;
+    }, [
+      products,
+      search,
+      sort,
+      categorySlug,
+    ]);
+
+  /* Clear category */
+
+  const clearCategory = () => {
+    router.push("/products");
+  };
+
+  /* Clear filters */
+
+  const clearFilters = () => {
+    setSearch("");
+
+    if (categorySlug) {
+      router.push(
+        "/products"
       );
-    });
-
-    result = [...result];
-
-    if (sort === "price-low") {
-      result.sort((a, b) => a.price - b.price);
     }
-
-    if (sort === "price-high") {
-      result.sort((a, b) => b.price - a.price);
-    }
-
-    if (sort === "name") {
-      result.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
-    }
-
-    return result;
-  }, [search, sort]);
+  };
 
   return (
     <main className="min-h-screen bg-[var(--background)] pb-[90px] lg:pb-0">
@@ -122,8 +197,47 @@ export default function ProductsPage() {
             </p>
 
             <h1 className="mt-1 font-serif text-[27px] font-semibold text-[var(--foreground)] lg:text-[38px]">
-              Our Desserts
+              {selectedCategory
+                ? selectedCategory.name
+                : "Our Desserts"}
             </h1>
+
+            {/* Active Category */}
+            {selectedCategory && (
+              <button
+                type="button"
+                onClick={
+                  clearCategory
+                }
+                className="
+                  mt-3
+                  inline-flex
+                  items-center
+                  gap-1.5
+                  rounded-full
+                  bg-[var(--surface)]
+                  px-3
+                  py-1.5
+                  text-[9px]
+                  font-semibold
+                  text-[var(--primary)]
+                  transition
+                  hover:opacity-75
+                  lg:text-[10px]
+                "
+              >
+                {
+                  selectedCategory.name
+                }
+
+                <X
+                  size={12}
+                  strokeWidth={
+                    1.8
+                  }
+                />
+              </button>
+            )}
           </motion.div>
 
           {/* Search */}
@@ -157,10 +271,19 @@ export default function ProductsPage() {
             <input
               type="text"
               value={search}
-              onChange={(event) =>
-                setSearch(event.target.value)
+              onChange={(
+                event
+              ) =>
+                setSearch(
+                  event.target
+                    .value
+                )
               }
-              placeholder="Search desserts..."
+              placeholder={
+                selectedCategory
+                  ? `Search ${selectedCategory.name.toLowerCase()}...`
+                  : "Search desserts..."
+              }
               className="
                 h-[44px]
                 w-full
@@ -184,7 +307,9 @@ export default function ProductsPage() {
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() =>
+                  setSearch("")
+                }
                 aria-label="Clear search"
                 className="
                   absolute
@@ -205,19 +330,24 @@ export default function ProductsPage() {
               >
                 <X
                   size={14}
-                  strokeWidth={1.7}
+                  strokeWidth={
+                    1.7
+                  }
                 />
               </button>
             )}
           </motion.div>
 
-          {/* Products Count + Sort */}
+          {/* Count + Sort */}
           <div className="mt-5 flex items-center justify-between border-b border-[var(--primary)]/10 pb-4 lg:mt-6">
             <p className="text-[10px] text-[var(--foreground)]/55 lg:text-[12px]">
               <span className="font-semibold text-[var(--foreground)]">
-                {filteredProducts.length}
+                {
+                  filteredProducts.length
+                }
               </span>{" "}
-              {filteredProducts.length === 1
+              {filteredProducts.length ===
+              1
                 ? "Dessert"
                 : "Desserts"}
             </p>
@@ -226,9 +356,12 @@ export default function ProductsPage() {
             <div className="relative">
               <select
                 value={sort}
-                onChange={(event) =>
+                onChange={(
+                  event
+                ) =>
                   setSort(
-                    event.target.value as SortOption
+                    event.target
+                      .value as SortOption
                   )
                 }
                 className="
@@ -257,11 +390,13 @@ export default function ProductsPage() {
                 </option>
 
                 <option value="price-low">
-                  Price: Low to High
+                  Price: Low to
+                  High
                 </option>
 
                 <option value="price-high">
-                  Price: High to Low
+                  Price: High to
+                  Low
                 </option>
 
                 <option value="name">
@@ -285,7 +420,8 @@ export default function ProductsPage() {
           </div>
 
           {/* Product Grid */}
-          {filteredProducts.length > 0 ? (
+          {filteredProducts.length >
+          0 ? (
             <motion.div
               layout
               className="
@@ -303,10 +439,15 @@ export default function ProductsPage() {
               "
             >
               {filteredProducts.map(
-                (product, index) => (
+                (
+                  product,
+                  index
+                ) => (
                   <motion.article
                     layout
-                    key={product.id}
+                    key={
+                      product._id
+                    }
                     initial={{
                       opacity: 0,
                       y: 18,
@@ -318,12 +459,14 @@ export default function ProductsPage() {
                     transition={{
                       duration: 0.4,
                       delay:
-                        (index % 4) * 0.04,
+                        (index %
+                          4) *
+                        0.04,
                     }}
                     className="min-w-0"
                   >
                     <Link
-                      href={`/products/${product.id}`}
+                      href={`/products/${product.slug}`}
                       className="group block"
                     >
                       {/* Image */}
@@ -339,8 +482,14 @@ export default function ProductsPage() {
                         "
                       >
                         <Image
-                          src={product.image}
-                          alt={product.name}
+                          src={
+                            product
+                              .images[0] ||
+                            "/images/product-placeholder.webp"
+                          }
+                          alt={
+                            product.name
+                          }
                           fill
                           sizes="
                             (max-width: 768px) 50vw,
@@ -354,23 +503,38 @@ export default function ProductsPage() {
                       {/* Details */}
                       <div className="pt-2.5 lg:pt-3.5">
                         <p className="text-[8px] font-semibold uppercase tracking-[0.13em] text-[var(--accent)] lg:text-[10px]">
-                          {product.category}
+                          {
+                            product
+                              .category
+                              .name
+                          }
                         </p>
 
                         <h2 className="mt-1 line-clamp-1 text-[11px] font-semibold text-[var(--foreground)] sm:text-[12px] lg:text-[15px]">
-                          {product.name}
+                          {
+                            product.name
+                          }
                         </h2>
 
                         {/* Price + Cart */}
                         <div className="mt-2 flex items-center justify-between gap-2 lg:mt-3">
                           <p className="text-[12px] font-bold text-[var(--primary)] lg:text-[14px]">
-                            AED {product.price}
+                            AED{" "}
+                            {
+                              product.price
+                            }
                           </p>
 
                           <button
                             type="button"
                             aria-label={`Add ${product.name} to cart`}
-                            onClick={(event) => {
+                            disabled={
+                              product.stock <=
+                              0
+                            }
+                            onClick={(
+                              event
+                            ) => {
                               event.preventDefault();
                               event.stopPropagation();
 
@@ -391,13 +555,19 @@ export default function ProductsPage() {
                               duration-300
                               hover:scale-110
                               hover:opacity-90
+                              disabled:cursor-not-allowed
+                              disabled:opacity-35
                               lg:h-9
                               lg:w-9
                             "
                           >
                             <ShoppingCart
-                              size={14}
-                              strokeWidth={1.8}
+                              size={
+                                14
+                              }
+                              strokeWidth={
+                                1.8
+                              }
                             />
                           </button>
                         </div>
@@ -430,13 +600,17 @@ export default function ProductsPage() {
                 No desserts found
               </h2>
 
-              <p className="mt-1 text-[10px] text-[var(--foreground)]/50 lg:text-[12px]">
-                Try searching for another dessert.
+              <p className="mt-1 max-w-[280px] text-[10px] leading-5 text-[var(--foreground)]/50 lg:text-[12px]">
+                {selectedCategory
+                  ? `There are currently no matching desserts in ${selectedCategory.name}.`
+                  : "Try searching for another dessert."}
               </p>
 
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={
+                  clearFilters
+                }
                 className="
                   mt-4
                   rounded-full
@@ -446,9 +620,13 @@ export default function ProductsPage() {
                   text-[10px]
                   font-semibold
                   text-[var(--white)]
+                  transition
+                  hover:opacity-90
                 "
               >
-                Clear Search
+                {selectedCategory
+                  ? "View All Desserts"
+                  : "Clear Search"}
               </button>
             </motion.div>
           )}

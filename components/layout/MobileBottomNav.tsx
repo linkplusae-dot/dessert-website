@@ -21,12 +21,25 @@ import {
 
 import ConnectMenu from "./ConnectMenu";
 
+import {
+  useCart,
+} from "@/context/CartContext";
+
 export default function MobileBottomNav() {
-  const [connectOpen, setConnectOpen] =
-    useState(false);
+  const {
+    cartCount,
+    isLoaded,
+  } = useCart();
+
+  const [
+    connectOpen,
+    setConnectOpen,
+  ] = useState(false);
 
   const wrapperRef =
-    useRef<HTMLDivElement>(null);
+    useRef<HTMLDivElement>(
+      null
+    );
 
   useEffect(() => {
     function handleOutsideClick(
@@ -77,13 +90,14 @@ export default function MobileBottomNav() {
       "
     >
       <div className="relative">
-
-        {/* CONNECT POPUP */}
+        {/* Connect Popup */}
         <ConnectMenu
-          open={connectOpen}
+          open={
+            connectOpen
+          }
         />
 
-        {/* NAV */}
+        {/* Nav */}
         <nav
           className="
             grid
@@ -101,11 +115,12 @@ export default function MobileBottomNav() {
             shadow-[0_-10px_35px_rgba(74,35,41,0.16)]
           "
         >
-
-          {/* HOME */}
+          {/* Home */}
           <Link
             href="/"
-            className={itemClass}
+            className={
+              itemClass
+            }
           >
             <motion.span
               whileTap={{
@@ -124,7 +139,9 @@ export default function MobileBottomNav() {
             >
               <Home
                 size={20}
-                strokeWidth={2}
+                strokeWidth={
+                  2
+                }
               />
             </motion.span>
 
@@ -133,10 +150,12 @@ export default function MobileBottomNav() {
             </span>
           </Link>
 
-          {/* ACCOUNT */}
+          {/* Account */}
           <Link
             href="/account"
-            className={itemClass}
+            className={
+              itemClass
+            }
           >
             <motion.div
               whileTap={{
@@ -145,7 +164,9 @@ export default function MobileBottomNav() {
             >
               <UserRound
                 size={25}
-                strokeWidth={1.6}
+                strokeWidth={
+                  1.6
+                }
               />
             </motion.div>
 
@@ -154,10 +175,18 @@ export default function MobileBottomNav() {
             </span>
           </Link>
 
-          {/* CART */}
+          {/* Cart */}
           <Link
             href="/cart"
-            className={itemClass}
+            aria-label={`Shopping cart${
+              isLoaded &&
+              cartCount > 0
+                ? `, ${cartCount} items`
+                : ""
+            }`}
+            className={
+              itemClass
+            }
           >
             <motion.div
               whileTap={{
@@ -167,28 +196,47 @@ export default function MobileBottomNav() {
             >
               <ShoppingCart
                 size={25}
-                strokeWidth={1.6}
+                strokeWidth={
+                  1.6
+                }
               />
 
-              <span
-                className="
-                  absolute
-                  -right-3
-                  -top-2
-                  flex
-                  h-[18px]
-                  min-w-[18px]
-                  items-center
-                  justify-center
-                  rounded-full
-                  bg-[#2D2020]
-                  px-1
-                  text-[9px]
-                  text-white
-                "
-              >
-                0
-              </span>
+              {isLoaded &&
+                cartCount >
+                  0 && (
+                  <motion.span
+                    key={
+                      cartCount
+                    }
+                    initial={{
+                      scale: 0.7,
+                    }}
+                    animate={{
+                      scale: 1,
+                    }}
+                    className="
+                      absolute
+                      -right-3
+                      -top-2
+                      flex
+                      h-[18px]
+                      min-w-[18px]
+                      items-center
+                      justify-center
+                      rounded-full
+                      bg-[#2D2020]
+                      px-1
+                      text-[9px]
+                      font-semibold
+                      text-white
+                    "
+                  >
+                    {cartCount >
+                    99
+                      ? "99+"
+                      : cartCount}
+                  </motion.span>
+                )}
             </motion.div>
 
             <span className="text-[11px]">
@@ -196,12 +244,15 @@ export default function MobileBottomNav() {
             </span>
           </Link>
 
-          {/* CONNECT */}
+          {/* Connect */}
           <motion.button
             type="button"
             onClick={() =>
               setConnectOpen(
-                (prev) => !prev
+                (
+                  previous
+                ) =>
+                  !previous
               )
             }
             whileTap={{
@@ -215,7 +266,9 @@ export default function MobileBottomNav() {
                 ? "Close contact options"
                 : "Open contact options"
             }
-            className={itemClass}
+            className={
+              itemClass
+            }
           >
             <motion.div
               animate={{
@@ -225,7 +278,8 @@ export default function MobileBottomNav() {
                     : 0,
               }}
               transition={{
-                duration: 0.25,
+                duration:
+                  0.25,
               }}
               className={`
                 flex
@@ -245,7 +299,9 @@ export default function MobileBottomNav() {
             >
               <Phone
                 size={24}
-                strokeWidth={1.8}
+                strokeWidth={
+                  1.8
+                }
               />
             </motion.div>
 
@@ -253,7 +309,6 @@ export default function MobileBottomNav() {
               Connect
             </span>
           </motion.button>
-
         </nav>
       </div>
     </div>

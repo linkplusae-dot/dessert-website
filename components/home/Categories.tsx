@@ -5,40 +5,15 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-const categories = [
-  {
-    name: "Cakes",
-    slug: "cakes",
-    image: "/images/categories/cakes.webp",
-  },
-  {
-    name: "Cupcakes",
-    slug: "cupcakes",
-    image: "/images/categories/cupcakes.webp",
-  },
-  {
-    name: "Cookies",
-    slug: "cookies",
-    image: "/images/categories/cookies.webp",
-  },
-  {
-    name: "Brownies",
-    slug: "brownies",
-    image: "/images/categories/brownies.webp",
-  },
-  {
-    name: "Dessert Cups",
-    slug: "dessert-cups",
-    image: "/images/categories/dessert-cups.webp",
-  },
-  {
-    name: "Gift Boxes",
-    slug: "gift-boxes",
-    image: "/images/categories/gift-boxes.webp",
-  },
-];
+import type { Category } from "@/types/category";
 
-export default function Categories() {
+type CategoriesProps = {
+  categories: Category[];
+};
+
+export default function Categories({
+  categories,
+}: CategoriesProps) {
   return (
     <section
       id="categories"
@@ -75,7 +50,7 @@ export default function Categories() {
           </div>
 
           <Link
-            href="/categories"
+            href="/products"
             className="flex items-center gap-1.5 pb-1 text-[11px] font-semibold text-[var(--primary)] transition-opacity hover:opacity-70 lg:text-sm"
           >
             View All
@@ -109,86 +84,93 @@ export default function Categories() {
             xl:px-12
           "
         >
-          {categories.map((category, index) => (
-            <motion.div
-              key={category.slug}
-              initial={{
-                opacity: 0,
-                y: 18,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: false,
-                amount: 0.2,
-              }}
-              transition={{
-                duration: 0.4,
-                delay: index * 0.05,
-              }}
-              className="
-                w-[64px]
-                shrink-0
-                snap-start
-                sm:w-[66px]
-                lg:w-auto
-              "
-            >
-              <Link
-                href={`/categories/${category.slug}`}
-                className="group flex flex-col items-center"
+          {categories.map(
+            (category, index) => (
+              <motion.div
+                key={category._id}
+                initial={{
+                  opacity: 0,
+                  y: 18,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                viewport={{
+                  once: false,
+                  amount: 0.2,
+                }}
+                transition={{
+                  duration: 0.4,
+                  delay:
+                    index * 0.05,
+                }}
+                className="
+                  w-[64px]
+                  shrink-0
+                  snap-start
+                  sm:w-[66px]
+                  lg:w-auto
+                "
               >
-                {/* Image */}
-                <div
-                  className="
-                    relative
-                    h-[60px]
-                    w-[60px]
-                    overflow-hidden
-                    rounded-full
-                    border
-                    border-[var(--accent)]/25
-                    bg-[var(--surface)]
-                    sm:h-[62px]
-                    sm:w-[62px]
-                    lg:h-[82px]
-                    lg:w-[82px]
-                    xl:h-[88px]
-                    xl:w-[88px]
-                  "
+                <Link
+                  href={`/products?category=${category.slug}`}
+                  className="group flex flex-col items-center"
                 >
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 640px) 60px, (max-width: 1024px) 62px, 88px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                </div>
+                  {/* Image */}
+                  <div
+                    className="
+                      relative
+                      h-[60px]
+                      w-[60px]
+                      overflow-hidden
+                      rounded-full
+                      border
+                      border-[var(--accent)]/25
+                      bg-[var(--surface)]
+                      sm:h-[62px]
+                      sm:w-[62px]
+                      lg:h-[82px]
+                      lg:w-[82px]
+                      xl:h-[88px]
+                      xl:w-[88px]
+                    "
+                  >
+                    <Image
+                      src={
+                        category.image
+                      }
+                      alt={
+                        category.name
+                      }
+                      fill
+                      sizes="(max-width: 640px) 60px, (max-width: 1024px) 62px, 88px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
 
-                {/* Name */}
-                <h3
-                  className="
-                    mt-1.5
-                    max-w-[64px]
-                    text-center
-                    text-[9px]
-                    font-semibold
-                    leading-tight
-                    text-[var(--foreground)]
-                    sm:text-[10px]
-                    lg:mt-2
-                    lg:max-w-[100px]
-                    lg:text-[12px]
-                  "
-                >
-                  {category.name}
-                </h3>
-              </Link>
-            </motion.div>
-          ))}
+                  {/* Name */}
+                  <h3
+                    className="
+                      mt-1.5
+                      max-w-[64px]
+                      text-center
+                      text-[9px]
+                      font-semibold
+                      leading-tight
+                      text-[var(--foreground)]
+                      sm:text-[10px]
+                      lg:mt-2
+                      lg:max-w-[100px]
+                      lg:text-[12px]
+                    "
+                  >
+                    {category.name}
+                  </h3>
+                </Link>
+              </motion.div>
+            )
+          )}
         </div>
       </div>
     </section>
